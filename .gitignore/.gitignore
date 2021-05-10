@@ -1,0 +1,103 @@
+ackage edu.ucr.cs.cs167.vsubr010
+
+import org.apache.spark.sql.SparkSession
+import org.apache.spark.SparkConf
+import org.apache.spark.sql.functions.{avg, map_values, sum}
+
+object App {
+
+  def main(args : Array[String]) {
+    val command: String = args(0)
+    val inputfile: String = args(1)
+
+    val conf = new SparkConf
+    if (!conf.contains("spark.master"))
+      conf.setMaster("local[*]")
+    println(s"Using Spark master '${conf.get("spark.master")}'")
+
+    val spark = SparkSession
+      .builder()
+      .appName("CS167 Lab6")
+      .config(conf)
+      .getOrCreate()
+
+    try {
+      val input = spark.read.format("csv")
+        .option("sep", "\t")
+        .option("inferSchema", "true")
+        .option("header", "true")
+        .load("nasa_19950801.tsv")
+
+      import spark.implicits._
+
+      //input.show()
+     // input.printSchema()
+      input.createOrReplaceTempView("log_lines")
+
+      val t1 = System.nanoTime
+      command match {
+       // case "count-all" =>
+          // TODO count total number of records in the file
+        //val totalcount=input.count()
+         // import spark.implicits._
+          //val queryResult = spark sql "SELECT count(*) FROM log_lines" first
+          //val count = queryResult.getAs[Long](0)
+         // println(s"Total count for file '${inputfile}' is '${totalcount}'")
+          //println(s"'${count}'" )
+        //case "code-filter" =>
+        // TODO Filter the file by response code, args(2), and print the total number of matching lines
+         // val filtercode : String = args(2)
+          // val codefilter =input.where($"response"===filtercode)
+          // val countfilter= codefilter.count()
+        //  println(s"Total count for file '${inputfile}' is '${countfilter}'")
+       // case "time-filter" =>
+        // TODO Filter by time range [from = args(2), to = args(3)], and print the total number of matching lines
+        //val fromdate : String = args(2)
+       // val Todate : String =args(3)
+        //val finaloutput =input.filter(x=>(x>=fromdate) && (x<=Todate))
+         // val finaloutput =input.where(($"time">=fromdate) && ($"time"<=Todate) )
+        //val countbytimefilter = finaloutput.count()
+       // println(s"Total count for file '${inputfile}' in time range ['${fromdate}', '${Todate}'] is '${countbytimefilter}'")
+       //case "count-by-code" =>
+        // TODO Group the lines by response code and count the number of records per group
+         //val groupdata  = input.groupBy("response").count().show()
+        case "sum-bytes-by-code" =>
+        // TODO Group the lines by response code and sum the total bytes per group
+         // val groupdata  = input.groupBy("response").agg(sum("bytes").alias("totalbytesperresponse")).show()
+        case "avg-bytes-by-code" =>
+       // TODO Group the liens by response code and calculate the average bytes per group
+          //val groupdata  = input.groupBy("response").agg(avg("bytes").alias("averagebytesperresponse")).show()
+        case "top-host" =>
+        // TODO print the host the largest number of lines and print the number of lines
+        //val hostdata  = input.groupBy("host").count().orderBy($"count".desc).first()
+        //val hostname = hostdata.getAs[String](0)
+          //val hostcount =hostdata.getAs[Long](1)
+        //println(s"Top host in the file nasa_19950801.tsv by number of entries Host: '${hostname}' totalentries: '${hostcount}'  ")
+          val queryResult = spark sql SELECT host  count(*) AS count
+      FROM log_lines
+      GROUPBY host
+      ORDERBY count DESC
+      //LIMIT 1;
+        //println(s"Top host in the file nasa_19950801.tsv by number of entries Host: '${hostname}' totalentries: '${hostcount}'  ")
+        case "comparison" =>
+        // TODO Given a specific time, calculate the number of lines per response code for the
+          //val filtertimestamp : String = args(2)
+        //val countBefore =input.where($"time"<filtertimestamp).groupBy("response").count()
+          //val countBefore1 =countBefore.withColumnRenamed("count", "count-before")
+          //val countAfter =input.where($"time">filtertimestamp).groupBy("response").count()
+          //val countAfter1 =countAfter.withColumnRenamed("count", "count-after")
+         //val totaloutput=countBefore1.join(countAfter1,"response").show()
+
+        // entries that happened before that time, and once more for the lines that happened at or after
+        // that time. Print them side-by-side in a tabular form.
+      }
+      //val t2 = System.nanoTime
+      //println(s"Command '${command}' on file '${inputfile}' finished in ${(t2-t1)*1E-9} seconds")
+
+
+
+    } finally {
+      spark.stop
+    }
+  }
+}
